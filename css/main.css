@@ -10,7 +10,7 @@
 
 body {
     margin: 0;
-    overflow-y: hidden;
+    overflow-y: auto;
     font-family: "Helvetica Neue", system-ui, sans-serif;
     background: radial-gradient(circle at 50% 20%, #0a0a0a, #000);
     color: var(--film-text);
@@ -30,7 +30,7 @@ body::after {
 /* HORIZONTAL CONTAINER */
 .container {
     display: flex;
-    height: 100vh;
+    min-height: 100vh;   /* KEY FIX */
     width: max-content;
     scroll-snap-type: x mandatory;
 }
@@ -64,13 +64,21 @@ body::after {
 /* PANELS */
 .panel {
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 140px); /* ← THIS IS THE REAL FIX */
+    margin-top: 70px;
+    margin-bottom: 70px;
+
     flex-shrink: 0;
-    padding: 140px 10vw;
+    padding: clamp(60px, 8vh, 140px) clamp(20px, 8vw, 140px);
+
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+:root {
+    --tape: 70px;
 }
 
 /* COVER */
@@ -98,7 +106,7 @@ body::after {
 }
 
 .film-frame {
-    width: 640px;
+    width: clamp(280px, 50vw, 640px);
     background: black;
     border: 14px solid #111;
     padding: 18px;
@@ -120,8 +128,8 @@ body::after {
 
 iframe {
     width: 100%;
-    height: 360px;
-    border: none;
+    aspect-ratio: 16 / 9;
+    height: auto;
 }
 
 /* SECTION HEADINGS */
@@ -186,9 +194,9 @@ h2 {
 }
 
 .current-video iframe {
-    width: 640px;
-    height: 360px;
-    border: 14px solid #111;
+    width: clamp(280px, 50vw, 640px);
+    aspect-ratio: 16 / 9;
+    height: auto;
 }
 
 .current-info {
@@ -220,4 +228,45 @@ h2 {
     0% { opacity: .94 }
     50% { opacity: 1 }
     100% { opacity: .96 }
+}
+
+@media (max-width: 900px) {
+
+    body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        scroll-snap-type: none;
+    }
+
+    .panel {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .film-track {
+        gap: 40px;
+        overflow-x: auto;
+    }
+
+    .current-project {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .skills-grid {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .nav-arrow {
+        display: none;
+    }
+
 }
