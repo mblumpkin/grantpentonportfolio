@@ -38,13 +38,16 @@ body::after {
 
 /* FILM TAPE */
 
-.panel::before,
-.panel::after {
+.container::before,
+.container::after {
     content: "";
-    position: absolute;
+    position: fixed;
     left: 0;
-    width: 100%;
+    width: 100vw;
     height: 80px;
+    z-index: 100;
+    pointer-events: none;
+
     background: repeating-linear-gradient(
         to right,
         #c7bfae 0px,
@@ -52,18 +55,13 @@ body::after {
         #000 40px,
         #000 80px
     );
-    opacity: 0;
-    transition: opacity 1.2s ease;
-}
 
-.panel::before { top: 0; }
-.panel::after { bottom: 0; }
-
-.panel.active::before,
-.panel.active::after {
-    opacity: 1;
     animation: flicker 3s infinite;
+    opacity: 0.95;
 }
+
+.container::before { top: 0; }
+.container::after { bottom: 0; }
 
 /* COVER */
 

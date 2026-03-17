@@ -1,9 +1,12 @@
 const panels = document.querySelectorAll(".panel");
 const container = document.querySelector(".container");
+const reel = document.querySelector(".reel");
+
 const leftArrow = document.querySelector(".left");
 const rightArrow = document.querySelector(".right");
 
-// --- Intersection Observer for active panel ---
+
+// ===== ACTIVE PANEL OBSERVER =====
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -15,63 +18,85 @@ const observer = new IntersectionObserver(entries => {
 
 panels.forEach(panel => observer.observe(panel));
 
-// --- Smooth horizontal scroll with mouse wheel ---
+
+// ===== WHEEL SCROLL =====
 window.addEventListener("wheel", e => {
-    e.preventDefault(); // prevent vertical scroll
+    e.preventDefault();
     window.scrollBy({
-        left: e.deltaY * 1.6,
+        left: e.deltaY * 1.4,
         behavior: "smooth"
     });
-    setTimeout(updateArrows, 50); // update arrows after scroll
 }, { passive: false });
 
-// --- Scroll to next/previous panel ---
-function scrollToNextPanel(direction = "right") {
-    const scrollLeft = window.scrollX;
-    if (direction === "right") {
-        for (let i = 0; i < panels.length; i++) {
-            if (panels[i].offsetLeft > scrollLeft + 10) {
-                window.scrollTo({ left: panels[i].offsetLeft, behavior: "smooth" });
-                break;
-            }
-        }
-    } else if (direction === "left") {
-        for (let i = panels.length - 1; i >= 0; i--) {
-            if (panels[i].offsetLeft < scrollLeft - 10) {
-                window.scrollTo({ left: panels[i].offsetLeft, behavior: "smooth" });
-                break;
-            }
+
+// ===== SMART PANEL SCROLL =====
+function scrollRight() {
+    const scrollX = window.scrollX;
+
+    const reelStart = reel.offsetLeft;
+    const reelEnd = reel.offsetLeft + reel.scrollWidth - window.innerWidth;
+
+    // If inside reel → scroll within reel first
+    if (scrollX >= reelStart && scrollX < reelEnd - 5) {
+        window.scrollBy({
+            left: window.innerWidth,
+            behavior: "smooth"
+        });
+        return;
+    }
+
+    // otherwise go to next panel
+    for (let i = 0; i < panels.length; i++) {
+        if (panels[i].offsetLeft > scrollX + 10) {
+            window.scrollTo({
+                left: panels[i].offsetLeft,
+                behavior: "smooth"
+            });
+            return;
         }
     }
-    setTimeout(updateArrows, 350); // update arrows after smooth scroll
 }
 
-// --- Arrow click events ---
-leftArrow.onclick = () => scrollToNextPanel("left");
-rightArrow.onclick = () => scrollToNextPanel("right");
+function scrollLeft() {
+    const scrollX = window.scrollX;
 
-// --- Show/hide arrows based on scroll position ---
+    const reelStart = reel.offsetLeft;
+
+    // If inside reel → scroll within reel first
+    if (scrollX > reelStart + 5 && scrollX <= reel.offsetLeft + reel.scrollWidth) {
+        window.scrollBy({
+            left: -window.innerWidth,
+            behavior: "smooth"
+        });
+        return;
+    }
+
+    // otherwise go to previous panel
+    for (let i = panels.length - 1; i >= 0; i--) {
+        if (panels[i].offsetLeft < scrollX - 10) {
+            window.scrollTo({
+                left: panels[i].offsetLeft,
+                behavior: "smooth"
+            });
+            return;
+        }
+    }
+}
+
+
+// ===== ARROWS =====
+rightArrow.onclick = scrollRight;
+leftArrow.onclick = scrollLeft;
+
+
+// ===== ARROW VISIBILITY =====
 function updateArrows() {
-    const scrollLeft = window.scrollX;
     const maxScroll = container.scrollWidth - window.innerWidth;
+    const scrollX = window.scrollX;
 
-    // Hide left arrow if at start
-    if (scrollLeft <= 0) {
-        leftArrow.style.display = "none";
-    } else {
-        leftArrow.style.display = "block";
-    }
-
-    // Hide right arrow if at end
-    if (scrollLeft >= maxScroll - 1) {
-        rightArrow.style.display = "none";
-    } else {
-        rightArrow.style.display = "block";
-    }
+    leftArrow.style.display = scrollX <= 0 ? "none" : "block";
+    rightArrow.style.display = scrollX >= maxScroll - 2 ? "none" : "block";
 }
 
-// --- Initialize arrows on load ---
-updateArrows();
-
-// --- Optional: update arrows on manual scroll ---
 window.addEventListener("scroll", updateArrows);
+updateArrows();
